@@ -1,0 +1,305 @@
+// Prisma schema for Kiroween2026
+// Docs: https://pris.ly/d/prisma-schema
+// Models below cover the tables Better Auth requires (User, Session, Account,
+// Verification). Add your own application models alongside them.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  caregiverProfile CaregiverProfile?
+  seniorProfile    SeniorProfile?
+  partnerProfile   PartnerProfile?
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// -----------------------------------------------------------------------------
+// Senior Call Shield (Mabel) application models.
+// Role and status values are stored as String columns constrained by
+// application-level const maps (src/lib/constants.ts), not Prisma enums, per the
+// workspace rule to avoid enums. IDs are cuid strings to match the Better Auth
+// convention above.
+// -----------------------------------------------------------------------------
+
+// A Caregiver account: manages one or more linked Seniors and holds the
+// Family_Plan billing relationship.
+model CaregiverProfile {
+  id        String          @id @default(cuid())
+  userId    String          @unique
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careLinks CareLink[]
+  billing   BillingAccount?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("caregiver_profile")
+}
+
+// A Senior account: the person whose inbound calls are screened and forwarded.
+// forwardingActive is the materialized result of the forwarding gate.
+model SeniorProfile {
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careLinks         CareLink[]
+  protectionNumber  ProtectionNumber?
+  knownContacts     KnownContact[]
+  consent           ConsentRecord?
+  callRecords       CallRecord[]
+  subscription      Subscription?
+  partnerMembership PartnerMembership?
+  forwardingActive  Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@map("senior_profile")
+}
+
+// A Partner (e.g. organization) account: enrolls Seniors and is billed per
+// active member.
+model PartnerProfile {
+  id           String              @id @default(cuid())
+  userId       String              @unique
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memberships  PartnerMembership[]
+  billing      BillingAccount?
+  subscription Subscription?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@map("partner_profile")
+}
+
+// Association between a Caregiver and a Senior. Only active links grant the
+// Caregiver access to the Senior's data (care-link scoping). Capped at 50
+// active links per Caregiver at the application layer.
+model CareLink {
+  id          String           @id @default(cuid())
+  caregiverId String
+  caregiver   CaregiverProfile @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  seniorId    String
+  senior      SeniorProfile    @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([caregiverId, seniorId])
+  @@index([caregiverId, active])
+  @@map("care_link")
+}
+
+// The provisioned SignalWire number callers dial, forwarded to the Senior's
+// Personal_Number. provisioningState is constrained by PROVISIONING_STATES.
+model ProtectionNumber {
+  id                String        @id @default(cuid())
+  seniorId          String        @unique
+  senior            SeniorProfile @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  e164Number        String        @unique // the provisioned Protection_Number
+  personalNumber    String // E.164 Personal_Number to forward to
+  signalwireId      String? // SignalWire number resource id
+  provisioningState String        @default("none") // PROVISIONING_STATES
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("protection_number")
+}
+
+// A number the Senior recognizes. Matching is exact on the normalized E.164
+// form. Unique per (seniorId, e164Number).
+model KnownContact {
+  id          String        @id @default(cuid())
+  seniorId    String
+  senior      SeniorProfile @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  e164Number  String // normalized E.164
+  displayName String?       @db.VarChar(100)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([seniorId, e164Number])
+  @@map("known_contact")
+}
+
+// The Senior's consent to forward calls. A valid non-withdrawn record is one of
+// the two conditions of the forwarding gate.
+model ConsentRecord {
+  id               String        @id @default(cuid())
+  seniorId         String        @unique
+  senior           SeniorProfile @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  protectionNumber String // Protection_Number at time of consent
+  consentedAt      DateTime // UTC, second precision
+  withdrawn        Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+
+  @@map("consent_record")
+}
+
+// A single screened inbound call. rawCallerNumber + normalizationFailed preserve
+// the original value when E.164 normalization fails. disposition is constrained
+// by CALL_DISPOSITIONS; riskCategory by RISK_CATEGORIES; riskScore is 0..100.
+model CallRecord {
+  id                  String        @id @default(cuid())
+  seniorId            String
+  senior              SeniorProfile @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  callerNumber        String // normalized E.164 or raw on failure
+  rawCallerNumber     String? // preserved original on normalization failure
+  normalizationFailed Boolean       @default(false)
+  knownContactName    String? // display name when a Known_Contact matched
+  startedAt           DateTime // UTC
+  endedAt             DateTime? // UTC
+  screeningOutcome    String // outcome text
+  riskCategory        String? // RISK_CATEGORIES
+  riskScore           Int? // 0..100
+  disposition         String // CALL_DISPOSITIONS
+  report              CallReport?
+  createdAt           DateTime      @default(now())
+
+  @@index([seniorId, startedAt(sort: Desc)])
+  @@map("call_record")
+}
+
+// The AI-generated summary for a Call_Record. available = false when report
+// generation failed (the Call_Record is retained regardless).
+model CallReport {
+  id            String     @id @default(cuid())
+  callRecordId  String     @unique
+  callRecord    CallRecord @relation(fields: [callRecordId], references: [id], onDelete: Cascade)
+  statedPurpose String     @default("undetermined")
+  riskCategory  String
+  reasonText    String
+  available     Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+
+  @@map("call_report")
+}
+
+// Stripe customer binding, owned by exactly one of a Caregiver or a Partner.
+model BillingAccount {
+  id               String            @id @default(cuid())
+  caregiverId      String?           @unique
+  caregiver        CaregiverProfile? @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+  partnerId        String?           @unique
+  partner          PartnerProfile?   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  stripeCustomerId String            @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@map("billing_account")
+}
+
+// A Stripe subscription, a one-of between a Senior (Family_Plan) and a Partner
+// (per-member plan). state mirrors Stripe and is constrained by
+// SUBSCRIPTION_STATES; quantity (Partner) is >= 0.
+model Subscription {
+  id                   String          @id @default(cuid())
+  stripeSubscriptionId String          @unique
+  seniorId             String?         @unique // Family_Plan: one per Senior
+  senior               SeniorProfile?  @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  partnerId            String?         @unique // Partner per-member plan
+  partner              PartnerProfile? @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  state                String // SUBSCRIPTION_STATES (mirrors Stripe)
+  monthlyPriceCents    Int? // Family_Plan price snapshot
+  quantity             Int? // Partner per-member billed quantity (>= 0)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  @@map("subscription")
+}
+
+// Enrollment of a Senior under a Partner. Active memberships drive the Partner
+// Subscription billed quantity.
+model PartnerMembership {
+  id        String         @id @default(cuid())
+  partnerId String
+  partner   PartnerProfile @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  seniorId  String         @unique
+  senior    SeniorProfile  @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([partnerId, active])
+  @@map("partner_membership")
+}
+
+// Idempotence ledger for Stripe webhooks. The unique stripeEventId guarantees an
+// event is applied at most once. matched = false records a verified but
+// unmatched event.
+model ProcessedWebhookEvent {
+  id            String   @id @default(cuid())
+  stripeEventId String   @unique // dedup key for idempotence
+  eventType     String
+  matched       Boolean  @default(true) // false = recorded unmatched event
+  processedAt   DateTime @default(now())
+
+  @@map("processed_webhook_event")
+}
+
+// The Call_Record retention window used by the background cleanup job.
+// retentionDays is 1..3650, default 365.
+model RetentionConfig {
+  id            String @id @default(cuid())
+  retentionDays Int    @default(365) // 1..3650, default 365
+
+  @@map("retention_config")
+}
