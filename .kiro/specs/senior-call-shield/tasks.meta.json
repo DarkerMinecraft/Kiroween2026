@@ -1,0 +1,871 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Add application models to the Prisma schema and run the migration": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402019
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147412529
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147547309
+      }
+    ],
+    "1.2 Create the application-level const value maps": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402165
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147413488
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147548701
+      }
+    ],
+    "1.3 Install and configure the test framework": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402268
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147414256
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147549212
+      }
+    ],
+    "2.1 Implement E.164 normalization and matching in `src/lib/phone.ts`": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402360
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147553954
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147700577
+      }
+    ],
+    "2.2 Write property test for E.164 normalization idempotence": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402482
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147860663
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147970925
+      }
+    ],
+    "2.3 Write property test for exact known-contact matching": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402602
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147861620
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147971851
+      }
+    ],
+    "2.4 Write property test for invalid-number fall-through": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402700
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147862568
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147972785
+      }
+    ],
+    "3.1 Implement risk-to-disposition mapping and the forwarding gate in `src/lib/screening.ts`": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402780
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147554869
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147701957
+      }
+    ],
+    "3.2 Write property test for risk-category disposition mapping": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402868
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147863964
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147974156
+      }
+    ],
+    "3.3 Write property test for the forwarding gate": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147402950
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147864549
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147974838
+      }
+    ],
+    "4.1 Implement role resolution and scoping checks in `src/lib/authz.ts`": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403063
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147556278
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147703387
+      }
+    ],
+    "4.2 Write property test for care-link scoping": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403166
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147979181
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148148419
+      }
+    ],
+    "5.1 Implement the SignalWire REST wrapper in `src/lib/signalwire.ts`": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403249
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147557220
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147704303
+      }
+    ],
+    "5.2 Implement the SWML document builders": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403332
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147558620
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147705206
+      }
+    ],
+    "5.3 Write unit tests for the SignalWire wrapper and SWML builders": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403416
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147980636
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148149791
+      }
+    ],
+    "6.1 Implement the Stripe wrapper in `src/lib/stripe.ts`": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403509
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147559489
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147857141
+      }
+    ],
+    "6.2 Write unit tests for the Stripe wrapper and mappers": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403628
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147981455
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148150510
+      }
+    ],
+    "7. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403716
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148153905
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148157150
+      }
+    ],
+    "8.1 Implement `/api/telephony/inbound` SWML route handler": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403798
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148162872
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148383240
+      }
+    ],
+    "8.2 Implement `/api/telephony/report` route handler": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403883
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148160809
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148384151
+      }
+    ],
+    "8.3 Write integration tests for the telephony handlers": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147403978
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148388691
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148575378
+      }
+    ],
+    "9.1 Implement `/api/billing/webhook` signature-verified idempotent handler": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404086
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148162178
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148382294
+      }
+    ],
+    "9.2 Write property test for webhook idempotence": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404169
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148387679
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148573568
+      }
+    ],
+    "9.3 Write integration tests for the billing webhook": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404259
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148389556
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148574508
+      }
+    ],
+    "10. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404335
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148578877
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148581674
+      }
+    ],
+    "11.1 Implement registration and role-setup actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404424
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148590864
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148911886
+      }
+    ],
+    "11.2 Implement care-link management actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404540
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148768893
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148917476
+      }
+    ],
+    "11.3 Implement consent actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404631
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148586845
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148912802
+      }
+    ],
+    "11.4 Write unit tests for registration, linking, and consent": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404720
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148923121
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149089097
+      }
+    ],
+    "12.1 Implement Protection_Number provisioning actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404807
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148587773
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148914201
+      }
+    ],
+    "12.2 Implement known-contact actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147404911
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148589154
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148915151
+      }
+    ],
+    "12.3 Write unit tests for provisioning and known-contact actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405039
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148924050
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149091004
+      }
+    ],
+    "13.1 Implement Family_Plan subscription actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405128
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148590100
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148916528
+      }
+    ],
+    "13.2 Implement Partner enrollment and billing actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405278
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148769921
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148918190
+      }
+    ],
+    "13.3 Write property test for partner billed quantity": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405414
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148922151
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149090051
+      }
+    ],
+    "13.4 Write unit tests for billing actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405519
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148924966
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149093949
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149104536
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149236497
+      }
+    ],
+    "14. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405605
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149239890
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149242933
+      }
+    ],
+    "15.1 Implement the Caregiver_Dashboard (RSC)": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405685
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149247067
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149547266
+      }
+    ],
+    "15.2 Implement the Senior_Dashboard (RSC)": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405777
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149248022
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149548212
+      }
+    ],
+    "15.3 Implement the Partner view (RSC)": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405894
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149249403
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149549609
+      }
+    ],
+    "15.4 Write property test for call-history ordering": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147405979
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149557169
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149775376
+      }
+    ],
+    "15.5 Write dashboard data-loading tests": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147406060
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149555489
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149776334
+      }
+    ],
+    "16.1 Implement the Call_Record retention job": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147406143
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149249999
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149550246
+      }
+    ],
+    "16.2 Write unit tests for the retention job": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147406247
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149556404
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149777128
+      }
+    ],
+    "17. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147406461
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149781556
+      },
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149794745
+      }
+    ],
+    "1. Set up data model, const maps, and test tooling": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147549303
+      }
+    ],
+    "2. Implement pure phone-number normalization and matching": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147973003
+      }
+    ],
+    "3. Implement pure risk gating and forwarding-gate logic": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794147974988
+      }
+    ],
+    "4. Implement authorization scoping": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148148567
+      }
+    ],
+    "5. Implement the SignalWire client wrapper and SWML builders": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148149902
+      }
+    ],
+    "6. Implement the Stripe client wrapper and mappers": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148150614
+      }
+    ],
+    "9. Implement the billing webhook route handler": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148574595
+      }
+    ],
+    "8. Implement the telephony route handlers": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794148575475
+      }
+    ],
+    "11. Implement registration, linking, and consent server actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149089245
+      }
+    ],
+    "12. Implement provisioning and known-contact server actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149091100
+      }
+    ],
+    "13. Implement billing server actions": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149094040
+      }
+    ],
+    "15. Implement the dashboards": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149776428
+      }
+    ],
+    "16. Implement the retention background job": [
+      {
+        "executionId": "fad0fc9f-40a2-43f0-b3f5-4a80b964055a",
+        "chatSessionId": "sess_57adcc2d-a623-4470-9dba-0341e3c2a245",
+        "timestamp": 1794149777246
+      }
+    ]
+  }
+}

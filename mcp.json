@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "shadcn-ui": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    },
+    "aws-docs": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": []
+    },
+    "aws-api": {
+      "command": "uvx",
+      "args": ["awslabs.aws-api-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1",
+        "AWS_PROFILE": "default"
+      },
+      "disabled": true,
+      "autoApprove": []
+    },
+    "npm-registry": {
+      "command": "npx",
+      "args": ["-y", "npm-registry-mcp"],
+      "env": {},
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

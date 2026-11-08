@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-Document, Lint, and Update README on Save",
+      "trigger": "PostFileSave",
+      "action": {
+        "type": "agent",
+        "prompt": "A file was just saved. Please perform the following tasks in order:\n\n1. **Documentation & Comments**: Review the saved file and add or improve inline comments and documentation (JSDoc, docstrings, or equivalent for the language). Focus on exported functions, classes, and any complex logic. Do not over-comment obvious code.\n\n2. **Lint**: Check the saved file for any linting issues using the project's configured linter (check for config files like .eslintrc, .prettierrc, pyproject.toml, etc.). Fix any auto-fixable issues and flag anything that requires manual attention.\n\n3. **README Update**: Review the saved file and determine if it introduces, removes, or significantly changes any user-facing functionality, public APIs, configuration options, or project structure. If yes, update the README.md at the project root to reflect those changes, keeping the style and tone consistent with the existing content. If the change is internal/minor, skip the README update."
+      }
+    }
+  ]
+}
