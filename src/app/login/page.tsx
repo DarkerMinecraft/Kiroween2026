@@ -2,10 +2,10 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { signIn, signUp } from "@/lib/auth-client";
-import { resolvePostAuthPath } from "@/app/actions/auth";
+import { signIn } from "@/lib/auth-client";
+import { registerCaregiver, resolvePostAuthPath } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,13 +21,17 @@ import { Label } from "@/components/ui/label";
 /**
  * Sign-in / sign-up page (`/login`).
  *
- * The dedicated authentication surface for the app. It drives the Better Auth
- * client for email/password sign-in and sign-up. On success it calls the
- * `resolvePostAuthPath` server action, which resolves the account's role from
- * the database, sets the optimistic role hint cookie the Edge proxy reads, and
- * returns the role's dashboard path to navigate to. Unauthenticated visitors
- * are routed here by `proxy.ts` when they hit a protected dashboard route;
- * authenticated visitors are redirected away from this page by the same proxy.
+ * The dedicated authentication surface for the app. Sign-up registers a new
+ * Caregiver through the `registerCaregiver` server action (which creates the
+ * account AND its CaregiverProfile, so the account has a role), then signs in
+ * to establish the session. Sign-in uses the Better Auth client directly.
+ * After either flow succeeds, `resolvePostAuthPath` resolves the account's
+ * role on the server, sets the proxy's role hint cookie, and returns the
+ * matching dashboard path.
+ *
+ * Unauthenticated visitors are routed here by `proxy.ts` when they hit a
+ * protected dashboard route; authenticated visitors are redirected away from
+ * this page by the same proxy.
  *
  * The `?mode=signup` search param opens the page in sign-up mode (linked from
  * the home page's "Create an account" call-to-action); any other value opens
@@ -39,9 +43,16 @@ import { Label } from "@/components/ui/label";
  * exception.
  */
 
+/**
+ * Performs a full-page navigation to `path`. Using `window.location` rather
+ * than the Next router avoids the client-side RSC refresh round-trip that fails
+ * under Cache Components right after authentication.
+ */
+const redirectToDashboard = (path: string): void => {
+  window.location.assign(path);
+};
 /** The sign-in / sign-up form, split out so it can read search params inside Suspense. */
 const LoginForm = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isSignUp = searchParams.get("mode") === "signup";
 
@@ -53,33 +64,49 @@ const LoginForm = () => {
   const handleSignIn = async () => {
     setLoading(true);
     const { error } = await signIn.email({ email, password });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error(error.message ?? "Sign in failed");
       return;
     }
     toast.success("Signed in");
-    // Resolve the role-specific dashboard (and set the proxy's role hint
-    // cookie) server-side, then navigate straight there.
-    const destination = await resolvePostAuthPath();
-    router.push(destination);
-    router.refresh();
+    // Resolve the role-specific dashboard and set the proxy's role hint
+    // cookie, then navigate with a full-page load to avoid the Cache Components
+    // client-side refresh failure after authentication.
+    redirectToDashboard(await resolvePostAuthPath());
   };
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await signUp.email({ name, email, password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message ?? "Sign up failed");
+
+    // Register through the server action rather than the raw Better Auth
+    // client: `registerCaregiver` creates the account AND exactly one
+    // CaregiverProfile in one step. Without that profile `resolveRole` returns
+    // null and the Caregiver_Dashboard redirects back to `/`, so a client-only
+    // `signUp.email` would leave the new account unable to reach any dashboard.
+    const result = await registerCaregiver({ name, email, password });
+    if (!result.ok) {
+      setLoading(false);
+      toast.error(result.message);
       return;
     }
+
+    // The server action creates the account but does not establish a browser
+    // session, so sign in with the same credentials to set the session cookie
+    // before navigating to the dashboard.
+    const { error } = await signIn.email({ email, password });
+    if (error) {
+      setLoading(false);
+      // The account exists; signing in is all that remains. Point the user at
+      // the sign-in form rather than silently failing.
+      toast.error(error.message ?? "Account created — please sign in");
+      return;
+    }
+
     toast.success("Account created");
-    // Resolve the role-specific dashboard (and set the proxy's role hint
-    // cookie) server-side, then navigate straight there.
-    const destination = await resolvePostAuthPath();
-    router.push(destination);
-    router.refresh();
+    // Full-page navigation to the role dashboard; see `handleSignIn` for why
+    // a hard redirect is used instead of `router.push`/`refresh`.
+    redirectToDashboard(await resolvePostAuthPath());
   };
 
   return (
