@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { signIn } from "@/lib/auth-client";
 import { registerCaregiver, resolvePostAuthPath } from "@/app/actions/auth";
@@ -43,9 +43,17 @@ import { Label } from "@/components/ui/label";
  * exception.
  */
 
+/**
+ * Performs a full-page navigation to `path`. Using `window.location` rather
+ * than the Next router avoids the client-side RSC refresh round-trip that fails
+ * under Cache Components right after authentication.
+ */
+const redirectToDashboard = (path: string): void => {
+  window.location.assign(path);
+};
+
 /** The sign-in / sign-up form, split out so it can read search params inside Suspense. */
 const LoginForm = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isSignUp = searchParams.get("mode") === "signup";
 
@@ -62,14 +70,15 @@ const LoginForm = () => {
       toast.error(error.message ?? "Sign in failed");
       return;
     }
-    // Route by role: a Caregiver, Senior, and Partner each land on their own
-    // dashboard. Resolving this on the server avoids sending, say, a Senior to
-    // `/caregiver` only to be bounced back to `/`.
-    const destination = await resolvePostAuthPath();
-    setLoading(false);
     toast.success("Signed in");
-    router.push(destination);
-    router.refresh();
+    // Resolve the role-specific dashboard on the server, then do a FULL-PAGE
+    // navigation (not `router.push`/`refresh`). A client-side RSC navigation
+    // here posts a server-action/refresh round-trip to the dashboard route,
+    // and under Cache Components that response is rejected by the Server Action
+    // runtime ("An unexpected response was received from the server"). A hard
+    // navigation loads the dashboard fresh with the session cookie already set,
+    // which the server component and proxy handle cleanly.
+    redirectToDashboard(await resolvePostAuthPath());
   };
 
   const handleSignUp = async () => {
@@ -99,13 +108,10 @@ const LoginForm = () => {
       return;
     }
 
-    // Registration always creates a Caregiver, so this resolves to
-    // `/caregiver`; the shared resolver keeps the two handlers consistent.
-    const destination = await resolvePostAuthPath();
-    setLoading(false);
     toast.success("Account created");
-    router.push(destination);
-    router.refresh();
+    // Full-page navigation to the role dashboard — see `handleSignIn` for why
+    // a hard redirect is used instead of `router.push`/`refresh`.
+    redirectToDashboard(await resolvePostAuthPath());
   };
 
   return (

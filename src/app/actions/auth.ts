@@ -21,6 +21,7 @@
  */
 
 import { headers } from "next/headers";
+import { z } from "zod";
 import { APIError } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -78,55 +79,155 @@ export interface CreateSeniorProfileInput {
 }
 
 /**
- * Validates the email against the RFC 5322 shape and the 254-char bound.
- * Returns the lowercased, trimmed email on success, or a typed failure.
+ * The validated, normalized registration input produced by {@link inputSchema}.
+ * `email` is already trimmed + lowercased and `name` is already trimmed, so the
+ * downstream duplicate lookup, account creation, and profile write all consume
+ * the normalized values.
  */
-const validateEmail = (
-  email: string,
-): { ok: true; normalized: string } | { ok: false; message: string } => {
-  const normalized = email.trim().toLowerCase();
+interface ValidatedInput {
+  readonly name: string;
+  readonly email: string;
+  readonly password: string;
+}
 
-  if (normalized.length === 0)
-    return { ok: false, message: "Email is required" };
-  if (normalized.length > MAX_EMAIL_LENGTH)
-    return { ok: false, message: "Email must be at most 254 characters" };
-  if (!EMAIL_PATTERN.test(normalized))
-    return { ok: false, message: "Email is not a valid address" };
+/**
+ * Name field: trimmed, then required to be non-empty. The transform runs before
+ * the `min(1)` check so a whitespace-only name rejects with "Name is required".
+ */
+const nameSchema = z
+  .string()
+  .transform((value) => value.trim())
+  .pipe(z.string().min(1, { message: "Name is required" }));
 
-  return { ok: true, normalized };
+/**
+ * Email field, reproducing the hand-rolled validator's order exactly: trim +
+ * lowercase first, then the non-empty / ≤254 / RFC 5322 shape checks run on the
+ * NORMALIZED value. The normalized email is what the schema yields, so the
+ * downstream case-insensitive duplicate lookup and account creation use it.
+ *
+ * `z.string` short-circuits on the first failing check, so the messages surface
+ * in the same precedence the inline validator used (required → too long → bad
+ * shape).
+ */
+const emailSchema = z
+  .string()
+  .transform((value) => value.trim().toLowerCase())
+  .pipe(
+    z
+      .string()
+      .min(1, { message: "Email is required" })
+      .max(MAX_EMAIL_LENGTH, {
+        message: "Email must be at most 254 characters",
+      })
+      .regex(EMAIL_PATTERN, { message: "Email is not a valid address" }),
+  );
+
+/**
+ * Password field: the 8–128 length bound, checked against the raw value (never
+ * trimmed, so leading/trailing characters count toward the length exactly as
+ * before). `min` is listed first so a short password reports the floor message.
+ */
+const passwordSchema = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH, {
+    message: "Password must be at least 8 characters",
+  })
+  .max(MAX_PASSWORD_LENGTH, {
+    message: "Password must be at most 128 characters",
+  });
+
+/**
+ * The combined registration input schema. Each field keeps its own message
+ * strings; field-first ordering (name → email → password) is applied by
+ * {@link validateInput} rather than relying on zod's issue collection order.
+ */
+const inputSchema = z.object({
+  name: nameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+/** The field-first precedence the UI and preservation tests depend on. */
+const FIELD_ORDER = ["name", "email", "password"] as const;
+
+/**
+ * Validates and normalizes a registration input via {@link inputSchema},
+ * reproducing the hand-rolled validators' outcome exactly: on failure it
+ * returns the single highest-precedence offending field (name → email →
+ * password) with the original message string; on success it returns the
+ * normalized (trimmed name, trimmed + lowercased email) values so no account or
+ * profile is created from un-normalized input.
+ */
+const validateInput = (
+  input: ValidatedInput,
+):
+  | { ok: true; value: ValidatedInput }
+  | { ok: false; field: string; message: string } => {
+  const parsed = inputSchema.safeParse(input);
+  if (parsed.success) return { ok: true, value: parsed.data };
+
+  const issues = parsed.error.issues;
+  // Pick the first offending field in the fixed name → email → password order,
+  // so the surfaced field/message never depends on zod's internal issue order.
+  for (const field of FIELD_ORDER) {
+    const issue = issues.find((candidate) => candidate.path[0] === field);
+    if (issue) return { ok: false, field, message: issue.message };
+  }
+
+  // Unreachable: an invalid parse always carries at least one field issue.
+  const [first] = issues;
+  return {
+    ok: false,
+    field: String(first?.path[0] ?? "name"),
+    message: first?.message ?? "Invalid input",
+  };
 };
 
-/** Validates the password length bound (8–128), returning a typed failure. */
-const validatePassword = (
-  password: string,
-): { ok: true } | { ok: false; message: string } => {
-  if (password.length < MIN_PASSWORD_LENGTH)
-    return { ok: false, message: "Password must be at least 8 characters" };
-  if (password.length > MAX_PASSWORD_LENGTH)
-    return { ok: false, message: "Password must be at most 128 characters" };
-
-  return { ok: true };
-};
+/**
+ * A generic, user-safe message for infrastructure/internal failures. It carries
+ * no exception internals and never echoes the submitted credentials, so it is
+ * safe to surface directly to the user (Req 2.4).
+ */
+const GENERIC_FAILURE_MESSAGE = "Something went wrong. Please try again.";
 
 /**
  * Checks whether an account already exists for `normalizedEmail`. Emails are
  * stored lowercased and `User.email` is unique, so the lookup is a
  * case-insensitive duplicate check (Req 1.5).
+ *
+ * The Prisma lookup is wrapped: a DB/adapter failure (cold Neon endpoint,
+ * connection exhaustion) is converted to a typed failure instead of escaping
+ * `"use server"` as an HTTP 500 (Req 2.1, 2.3). The actual-duplicate case is
+ * reported unchanged so the caller surfaces the same "already registered"
+ * email error. Success distinguishes "found" from "not found" via `exists`.
  */
 const emailAlreadyRegistered = async (
   normalizedEmail: string,
-): Promise<boolean> => {
-  const existing = await prisma.user.findUnique({
-    where: { email: normalizedEmail },
-    select: { id: true },
-  });
-  return existing !== null;
+): Promise<
+  | { ok: true; exists: boolean }
+  | { ok: false; field: string; message: string }
+> => {
+  try {
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true },
+    });
+    return { ok: true, exists: existing !== null };
+  } catch {
+    return { ok: false, field: "form", message: GENERIC_FAILURE_MESSAGE };
+  }
 };
 
 /**
  * Creates the Better Auth account for a validated, non-duplicate registration.
- * Returns the new user id, or a typed failure when Better Auth rejects the
- * sign-up (e.g. a duplicate it detects itself). No profile row is created here.
+ * Returns the new user id, or a typed failure when account creation fails.
+ *
+ * An `APIError` (e.g. a duplicate Better Auth detects itself) surfaces its own
+ * user-facing message. Any other error — a Better Auth internal error, a
+ * Prisma/Neon adapter failure during the write — is converted to a generic,
+ * user-safe message instead of being re-thrown, so a non-`APIError` can never
+ * escape `"use server"` and become an opaque HTTP 500 (Req 2.1, 2.3). No raw
+ * exception internals and no password ever reach the returned message (Req 2.4).
  */
 const createAccount = async (
   name: string,
@@ -139,12 +240,22 @@ const createAccount = async (
     });
     return { ok: true, userId: result.user.id };
   } catch (error) {
-    if (error instanceof APIError)
-      return {
-        ok: false,
-        message: error.message || "Unable to create the account",
-      };
-    throw error;
+    // `APIError` carries Better Auth's own user-facing status text (e.g. a
+    // duplicate-email message), so it is safe to surface. Everything else — a
+    // Better Auth internal error, a Prisma/Neon adapter failure — is collapsed
+    // to the generic message so no exception internals escape (Req 2.1, 2.3).
+    //
+    // Defense in depth for Req 2.4: the raw password is only ever passed to
+    // `signUpEmail` and must never reappear on the error surface. On the off
+    // chance a surfaced `APIError.message` were to echo the submitted password,
+    // fall back to the generic message rather than leaking it.
+    if (error instanceof APIError) {
+      const surfaced = error.message || "Unable to create the account";
+      if (surfaced.includes(password))
+        return { ok: false, message: GENERIC_FAILURE_MESSAGE };
+      return { ok: false, message: surfaced };
+    }
+    return { ok: false, message: GENERIC_FAILURE_MESSAGE };
   }
 };
 
@@ -160,25 +271,22 @@ const createAccount = async (
 export const registerCaregiver = async (
   input: RegisterCaregiverInput,
 ): Promise<ActionResult> => {
-  const name = input.name.trim();
-  if (name.length === 0)
-    return { ok: false, field: "name", message: "Name is required" };
+  const validated = validateInput(input);
+  if (!validated.ok)
+    return { ok: false, field: validated.field, message: validated.message };
+  const { name, email, password } = validated.value;
 
-  const email = validateEmail(input.email);
-  if (!email.ok) return { ok: false, field: "email", message: email.message };
-
-  const password = validatePassword(input.password);
-  if (!password.ok)
-    return { ok: false, field: "password", message: password.message };
-
-  if (await emailAlreadyRegistered(email.normalized))
+  const duplicate = await emailAlreadyRegistered(email);
+  if (!duplicate.ok)
+    return { ok: false, field: duplicate.field, message: duplicate.message };
+  if (duplicate.exists)
     return {
       ok: false,
       field: "email",
       message: "This email is already registered",
     };
 
-  const account = await createAccount(name, email.normalized, input.password);
+  const account = await createAccount(name, email, password);
   if (!account.ok)
     return { ok: false, field: "email", message: account.message };
 
@@ -186,10 +294,13 @@ export const registerCaregiver = async (
     await prisma.caregiverProfile.create({
       data: { userId: account.userId },
     });
-  } catch (error) {
-    // Roll back the orphaned account so no User is left without a role row.
+  } catch {
+    // Roll back the orphaned account so no User is left without a role row,
+    // then report a typed failure instead of re-throwing — a profile-write
+    // failure must not escape "use server" as an HTTP 500 (Req 2.3, 3.3). The
+    // rollback is retained exactly: no partial writes remain.
     await prisma.user.delete({ where: { id: account.userId } }).catch(() => {});
-    throw error;
+    return { ok: false, field: "form", message: GENERIC_FAILURE_MESSAGE };
   }
 
   return { ok: true };
@@ -209,25 +320,22 @@ export const registerCaregiver = async (
 export const createSeniorProfile = async (
   input: CreateSeniorProfileInput,
 ): Promise<SeniorProfileResult> => {
-  const name = input.name.trim();
-  if (name.length === 0)
-    return { ok: false, field: "name", message: "Name is required" };
+  const validated = validateInput(input);
+  if (!validated.ok)
+    return { ok: false, field: validated.field, message: validated.message };
+  const { name, email, password } = validated.value;
 
-  const email = validateEmail(input.email);
-  if (!email.ok) return { ok: false, field: "email", message: email.message };
-
-  const password = validatePassword(input.password);
-  if (!password.ok)
-    return { ok: false, field: "password", message: password.message };
-
-  if (await emailAlreadyRegistered(email.normalized))
+  const duplicate = await emailAlreadyRegistered(email);
+  if (!duplicate.ok)
+    return { ok: false, field: duplicate.field, message: duplicate.message };
+  if (duplicate.exists)
     return {
       ok: false,
       field: "email",
       message: "This email is already registered",
     };
 
-  const account = await createAccount(name, email.normalized, input.password);
+  const account = await createAccount(name, email, password);
   if (!account.ok)
     return { ok: false, field: "email", message: account.message };
 
@@ -237,10 +345,13 @@ export const createSeniorProfile = async (
       select: { id: true },
     });
     return { ok: true, profileId: profile.id };
-  } catch (error) {
-    // Roll back the orphaned account so no User is left without a role row.
+  } catch {
+    // Roll back the orphaned account so no User is left without a role row,
+    // then report a typed failure instead of re-throwing — a profile-write
+    // failure must not escape "use server" as an HTTP 500 (Req 2.3, 3.3). The
+    // rollback is retained exactly: no partial writes remain.
     await prisma.user.delete({ where: { id: account.userId } }).catch(() => {});
-    throw error;
+    return { ok: false, field: "form", message: GENERIC_FAILURE_MESSAGE };
   }
 };
 
