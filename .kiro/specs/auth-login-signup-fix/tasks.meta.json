@@ -1,0 +1,223 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration tests (BEFORE implementing the fix)": {
+      "status": "passed",
+      "failingExample": "All 4 bug-condition cases failed on the UNFIXED code (expected — confirms the bug). Counterexamples:\n\n- Case 1 (signUpEmail internal error): registerCaregiver(validInput) with auth.api.signUpEmail rejecting `new Error(\"internal hashing failure\")` THREW \"internal hashing failure\" instead of returning { ok:false, field, message }. createAccount catches only APIError and re-throws everything else.\n\n- Case 2 (duplicate-lookup DB error): registerCaregiver(validInput) with prisma.user.findUnique rejecting `new Error(\"Can't reach database server: connection refused\")` THREW that error instead of returning a typed result. emailAlreadyRegistered does not wrap the lookup.\n\n- Case 3 (profile-write failure): registerCaregiver(validInput) with caregiverProfile.create rejecting `new Error(\"Can't reach database server\")` — orphan rollback via user.delete({ where: { id: \"u_orphan\" } }) DID occur (preserved), but the action then re-threw (\"Can't reach database server\") instead of returning { ok:false, field, message }. Documents the exact delivery change: rollback preserved, throw -> typed result.\n\n- Case 4 (edge, sign-in handler 500-class error): modelling the Better Auth signIn.email path rejecting `new Error(\"Internal Server Error (500)\")`, the unhandled rejection escaped (settled.handled === false; expected true). No handling wrapper surfaces a user-safe error on the unfixed path.\n\nEach case throws/escapes rather than delivering a typed { ok:false, field, message } — the non-APIError escapes \"use server\" and becomes an opaque HTTP 500. Baseline: the 10 pre-existing tests still pass.",
+      "lastRunTimestamp": 1794189494952
+    },
+    "3.7 Verify bug condition exploration tests now pass": {
+      "status": "passed",
+      "lastRunTimestamp": 1794201747663
+    },
+    "3.8 Verify preservation property tests still pass": {
+      "status": "passed",
+      "lastRunTimestamp": 1794201750503
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration tests (BEFORE implementing the fix)": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332307
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189353882
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189530494
+      }
+    ],
+    "2. Write preservation property tests (BEFORE implementing the fix)": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332407
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189540491
+      }
+    ],
+    "3.1 Add zod as a pinned dependency": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332524
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189720945
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189773688
+      }
+    ],
+    "3.2 Replace hand-rolled validators with zod schemas in `src/app/actions/auth.ts`": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332606
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189782321
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189907854
+      }
+    ],
+    "3.3 Convert any thrown error into a typed result (primary 500 fix) in `src/app/actions/auth.ts`": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332687
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189911253
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794190696677
+      }
+    ],
+    "3.4 Guarantee safe password handling in `src/app/actions/auth.ts`": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332751
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794190700151
+      },
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794190961028
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201629085
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201641630
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201710562
+      }
+    ],
+    "3.5 Harden the shared database connection in `src/lib/prisma.ts`": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332839
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201642539
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201711950
+      }
+    ],
+    "3.6 Verify Better Auth DB wiring in `src/lib/auth.ts`": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332922
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201643651
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201712816
+      }
+    ],
+    "3.7 Verify bug condition exploration tests now pass": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189332991
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201719193
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201762903
+      }
+    ],
+    "3.8 Verify preservation property tests still pass": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189333059
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201719771
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201763763
+      }
+    ],
+    "4. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "7fec3f9c-7d46-4706-96c2-ab3ea6c60c39",
+        "chatSessionId": "sess_82f7829c-803a-4318-9371-c32c2589bdab",
+        "timestamp": 1794189333126
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201772373
+      },
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201841473
+      }
+    ],
+    "3. Fix auth 500s, add zod validation, and harden the shared DB connection": [
+      {
+        "executionId": "6d8469a9-a713-4a55-87d8-42f0d41939e8",
+        "chatSessionId": "sess_82a8cb4c-b044-4286-8ff1-4ede200ba0b8",
+        "timestamp": 1794201763838
+      }
+    ]
+  }
+}

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { resolveRole } from "@/lib/authz";
+import { ROLES } from "@/lib/constants";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -64,8 +66,22 @@ const FEATURES: readonly Feature[] = [
  */
 export const instant = false;
 
+/** Maps an effective role to its dashboard path for the "go to dashboard" link. */
+const DASHBOARD_PATH_BY_ROLE: Record<string, string> = {
+  [ROLES.caregiver]: "/caregiver",
+  [ROLES.senior]: "/senior",
+  [ROLES.partner]: "/partner",
+};
+
 const Home = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
+
+  // Point the signed-in call-to-action at the account's own dashboard. A
+  // hardcoded `/caregiver` would bounce a Senior or Partner back here, since
+  // each dashboard gates on role server-side. An account with no profile yet
+  // has no dashboard, so it falls through to the signed-out call-to-action.
+  const role = session ? await resolveRole(session.user.id) : null;
+  const dashboardPath = role ? DASHBOARD_PATH_BY_ROLE[role] : undefined;
 
   return (
     <main className="flex flex-1 flex-col">
@@ -85,9 +101,9 @@ const Home = async () => {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {session ? (
+          {dashboardPath ? (
             <Link
-              href="/caregiver"
+              href={dashboardPath}
               className={cn(buttonVariants({ size: "lg" }))}
             >
               Go to your dashboard
