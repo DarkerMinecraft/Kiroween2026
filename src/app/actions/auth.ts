@@ -20,9 +20,16 @@
  * Senior's id so the linking action can attach a Care_Link in a follow-up step.
  */
 
+import { cookies, headers } from "next/headers";
 import { APIError } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { resolveRole } from "@/lib/authz";
+import {
+  DEFAULT_DASHBOARD_PATH,
+  ROLE_HINT_COOKIE,
+  dashboardPathForRole,
+} from "@/lib/role-routing";
 
 /** Maximum length of an email address per RFC 5321/5322. */
 const MAX_EMAIL_LENGTH = 254;
@@ -239,4 +246,46 @@ export const createSeniorProfile = async (
     await prisma.user.delete({ where: { id: account.userId } }).catch(() => {});
     throw error;
   }
+};
+
+/**
+ * Resolves where a freshly authenticated account should land, and sets the
+ * optimistic role hint cookie the Edge proxy reads.
+ *
+ * Called from the login page right after a successful sign-in / sign-up. It
+ * reads the live session, resolves the role from the database (the source of
+ * truth — role is profile-row presence, not a stored column), writes the
+ * `scs_role` hint cookie so the proxy can route `/` and `/login` straight to
+ * the right dashboard, and returns that same path for the client to navigate
+ * to. When no session or no role profile exists yet, it clears any stale hint
+ * and falls back to the default dashboard path.
+ *
+ * The hint cookie is advisory only: dashboards and server actions re-verify the
+ * session and role server-side, so a stale or spoofed hint cannot grant access.
+ */
+export const resolvePostAuthPath = async (): Promise<string> => {
+  const cookieStore = await cookies();
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) {
+    cookieStore.delete(ROLE_HINT_COOKIE);
+    return DEFAULT_DASHBOARD_PATH;
+  }
+
+  const role = await resolveRole(session.user.id);
+  if (!role) {
+    cookieStore.delete(ROLE_HINT_COOKIE);
+    return DEFAULT_DASHBOARD_PATH;
+  }
+
+  // Non-sensitive routing hint; not HttpOnly so it stays cheap to read, and
+  // never used for authorization (dashboards re-check server-side).
+  cookieStore.set(ROLE_HINT_COOKIE, role, {
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return dashboardPathForRole(role);
 };

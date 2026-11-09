@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { signIn, signUp } from "@/lib/auth-client";
+import { resolvePostAuthPath } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,11 +22,12 @@ import { Label } from "@/components/ui/label";
  * Sign-in / sign-up page (`/login`).
  *
  * The dedicated authentication surface for the app. It drives the Better Auth
- * client for email/password sign-in and sign-up, and on success sends the
- * account to `/caregiver` — the per-role dashboards themselves resolve the
- * effective role and redirect as needed. Unauthenticated visitors are routed
- * here by `proxy.ts` when they hit a protected dashboard route; authenticated
- * visitors are redirected away from this page by the same proxy.
+ * client for email/password sign-in and sign-up. On success it calls the
+ * `resolvePostAuthPath` server action, which resolves the account's role from
+ * the database, sets the optimistic role hint cookie the Edge proxy reads, and
+ * returns the role's dashboard path to navigate to. Unauthenticated visitors
+ * are routed here by `proxy.ts` when they hit a protected dashboard route;
+ * authenticated visitors are redirected away from this page by the same proxy.
  *
  * The `?mode=signup` search param opens the page in sign-up mode (linked from
  * the home page's "Create an account" call-to-action); any other value opens
@@ -36,9 +38,6 @@ import { Label } from "@/components/ui/label";
  * as an arrow-function const per the workspace App Router file-convention
  * exception.
  */
-
-/** Where to send an account once it is authenticated. */
-const POST_AUTH_DESTINATION = "/caregiver";
 
 /** The sign-in / sign-up form, split out so it can read search params inside Suspense. */
 const LoginForm = () => {
@@ -60,7 +59,10 @@ const LoginForm = () => {
       return;
     }
     toast.success("Signed in");
-    router.push(POST_AUTH_DESTINATION);
+    // Resolve the role-specific dashboard (and set the proxy's role hint
+    // cookie) server-side, then navigate straight there.
+    const destination = await resolvePostAuthPath();
+    router.push(destination);
     router.refresh();
   };
 
@@ -73,7 +75,10 @@ const LoginForm = () => {
       return;
     }
     toast.success("Account created");
-    router.push(POST_AUTH_DESTINATION);
+    // Resolve the role-specific dashboard (and set the proxy's role hint
+    // cookie) server-side, then navigate straight there.
+    const destination = await resolvePostAuthPath();
+    router.push(destination);
     router.refresh();
   };
 

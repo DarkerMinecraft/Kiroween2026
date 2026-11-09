@@ -1,6 +1,10 @@
 # Kiroween2026
 
+[![CI](https://github.com/DarkerMinecraft/Kiroween2026/actions/workflows/ci.yml/badge.svg)](https://github.com/DarkerMinecraft/Kiroween2026/actions/workflows/ci.yml)
+
 A full-stack [Next.js](https://nextjs.org) app with authentication and a database layer.
+
+The badge above reflects the latest [CI run](https://github.com/DarkerMinecraft/Kiroween2026/actions/workflows/ci.yml) on `main`, which lints, runs the full test suite, and builds the app on every push and pull request.
 
 ## Stack
 
@@ -16,7 +20,7 @@ A full-stack [Next.js](https://nextjs.org) app with authentication and a databas
    ```bash
    npm install
    ```
-2. Set environment variables in `.env` (gitignored):
+2. Set environment variables in `.env` (gitignored). Copy the template to get started — `cp .env.example .env` — then fill in real values. The full list:
    - `DATABASE_URL` — your PostgreSQL connection string.
    - `BETTER_AUTH_SECRET` — a random secret. Generate one with `npx @better-auth/cli@latest secret`.
    - `BETTER_AUTH_URL` / `NEXT_PUBLIC_BETTER_AUTH_URL` — the app's base URL (e.g. `http://localhost:3000`).
@@ -37,7 +41,7 @@ A full-stack [Next.js](https://nextjs.org) app with authentication and a databas
    ```bash
    npm run dev
    ```
-   Open http://localhost:3000. The home page (`/`) introduces the product and links to the sign-in / sign-up page at `/login`. Once signed in you land on a role dashboard (`/caregiver`, `/senior`, or `/partner`); `src/proxy.ts` redirects unauthenticated visitors from those routes back to `/login`.
+   Open http://localhost:3000. The home page (`/`) introduces the product and links to the sign-in / sign-up page at `/login`. Once signed in you land on a role dashboard (`/caregiver`, `/senior`, or `/partner`); `src/proxy.ts` redirects unauthenticated visitors from those routes back to `/login`, and sends signed-in visitors who hit `/` or `/login` straight to their role dashboard (resolved from an optimistic `scs_role` hint cookie set at sign-in, so there is no extra redirect hop).
 
 ## Scripts
 
@@ -62,7 +66,8 @@ A full-stack [Next.js](https://nextjs.org) app with authentication and a databas
 - `src/lib/retention.ts` — pure Call_Record retention logic: `resolveRetentionDays` (clamps the configured window to 1–3650 days, default 365) and `deleteExpiredCallRecords` (reads `RetentionConfig`, computes the cutoff, and deletes Call_Records started before it), kept free of the HTTP layer so it can be unit tested directly.
 - `src/lib/auth.ts` — Better Auth server config.
 - `src/lib/auth-client.ts` — Better Auth React client (`signIn`, `signUp`, `signOut`, `useSession`).
-- `src/proxy.ts` — Next.js 16 Proxy (the renamed Middleware). Runs an optimistic session-cookie check on dashboard routes: it redirects unauthenticated visitors to `/login` and signed-in visitors away from `/login`. It never reads the database — the dashboards and server actions remain the authoritative authorization layer.
+- `src/proxy.ts` — Next.js 16 Proxy (the renamed Middleware). Runs an optimistic session-cookie check: it redirects unauthenticated visitors off the dashboards to `/login`, and redirects signed-in visitors away from the public `/login` and `/` pages straight to their role dashboard. It never reads the database — it routes using the `scs_role` hint cookie and falls back to `/caregiver` when the hint is absent; the dashboards and server actions remain the authoritative authorization layer.
+- `src/lib/role-routing.ts` — shared, Edge-safe role → dashboard routing: the `scs_role` hint cookie name, the role → path map, and the default fallback. Imported by the proxy (edge), the `resolvePostAuthPath` server action (which writes the hint), and anywhere else that maps a role to its dashboard.
 - `src/lib/stripe.ts` — Stripe billing wrapper (customer/subscription management) and Stripe-to-local subscription-state mappers.
 - `src/generated/prisma` — generated Prisma client (gitignored).
 - `prisma/schema.prisma` — database schema: Better Auth models (`user`, `session`, `account`, `verification`) plus the Senior Call Shield application models (`caregiver_profile`, `senior_profile`, `partner_profile`, `care_link`, `protection_number`, `known_contact`, `consent_record`, `call_record`, `call_report`, `billing_account`, `subscription`, `partner_membership`, `processed_webhook_event`, `retention_config`).
@@ -72,7 +77,7 @@ A full-stack [Next.js](https://nextjs.org) app with authentication and a databas
 
 Email/password sign-in is enabled out of the box, with the sign-in / sign-up form at `/login`. To add social providers, uncomment and fill in the `socialProviders` block in `src/lib/auth.ts`. Auth endpoints are served from `/api/auth/*`.
 
-Route protection runs in two layers: `src/proxy.ts` does a fast optimistic session-cookie check to keep unauthenticated users out of the dashboards, and each dashboard (plus every server action) re-verifies the session server-side and scopes data by role — the authoritative check lives next to the data, not in the proxy.
+Route protection runs in two layers: `src/proxy.ts` does a fast optimistic session-cookie check to keep unauthenticated users out of the dashboards (and to send signed-in users on `/` or `/login` straight to their role dashboard, using the advisory `scs_role` hint cookie set by `resolvePostAuthPath` at sign-in), and each dashboard (plus every server action) re-verifies the session server-side and scopes data by role — the authoritative check lives next to the data, not in the proxy, so a stale or spoofed hint only affects which dashboard the redirect targets, never access.
 
 ## MCP Servers
 

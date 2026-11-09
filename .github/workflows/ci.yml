@@ -1,0 +1,68 @@
+name: CI
+
+# Runs the full quality gate on every push and pull request to main — the
+# branch deployments are cut from — so the same checks that must pass before a
+# deploy are enforced in CI. The job status is surfaced as a badge in README.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Allow manual runs from the Actions tab.
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, test & build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        # The generated client (src/generated/prisma) is gitignored, so it must
+        # be regenerated before type-checking/building.
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        # The suite mocks Prisma and all external services, so it needs no real
+        # database or secrets.
+        run: npm test
+
+      - name: Build
+        # `next build` evaluates modules that read env and construct the Prisma
+        # client, so provide placeholder values. No real services are contacted.
+        env:
+          DATABASE_URL: postgresql://user:password@localhost:5432/ci?sslmode=disable
+          BETTER_AUTH_SECRET: ci-placeholder-secret-value-not-used
+          BETTER_AUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_BETTER_AUTH_URL: http://localhost:3000
+          APP_BASE_URL: http://localhost:3000
+          STRIPE_SECRET_KEY: sk_test_ci_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+          STRIPE_FAMILY_PRICE_ID: price_family_ci
+          STRIPE_PARTNER_PRICE_ID: price_partner_ci
+          SIGNALWIRE_PROJECT_ID: ci-project
+          SIGNALWIRE_API_TOKEN: ci-token
+          SIGNALWIRE_SPACE_URL: example.signalwire.com
+          TELEPHONY_WEBHOOK_SECRET: ci-telephony-secret
+          CRON_SECRET: ci-cron-secret
+        run: npm run build
