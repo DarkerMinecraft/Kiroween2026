@@ -70,7 +70,7 @@ A full-stack [Next.js](https://nextjs.org) app with authentication and a databas
 
 ## Authentication
 
-Email/password sign-in is enabled out of the box, with the sign-in / sign-up form at `/login`. To add social providers, uncomment and fill in the `socialProviders` block in `src/lib/auth.ts`. Auth endpoints are served from `/api/auth/*`.
+Email/password sign-in is enabled out of the box, with the sign-in / sign-up form at `/login`. Sign-up registers a new Caregiver via the `registerCaregiver` server action — which creates the account **and** its `CaregiverProfile` in one step, so the account has a role — then signs in. After either sign-in or sign-up, the `resolvePostAuthPath` server action resolves the account's role on the server and routes it to the matching dashboard (`/caregiver`, `/senior`, or `/partner`), so no role is sent to a dashboard it would only be bounced out of. To add social providers, uncomment and fill in the `socialProviders` block in `src/lib/auth.ts`. Auth endpoints are served from `/api/auth/*`.
 
 Route protection runs in two layers: `src/proxy.ts` does a fast optimistic session-cookie check to keep unauthenticated users out of the dashboards, and each dashboard (plus every server action) re-verifies the session server-side and scopes data by role — the authoritative check lives next to the data, not in the proxy.
 

@@ -20,9 +20,12 @@
  * Senior's id so the linking action can attach a Care_Link in a follow-up step.
  */
 
+import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { resolveRole } from "@/lib/authz";
+import { ROLES } from "@/lib/constants";
 
 /** Maximum length of an email address per RFC 5321/5322. */
 const MAX_EMAIL_LENGTH = 254;
@@ -239,4 +242,39 @@ export const createSeniorProfile = async (
     await prisma.user.delete({ where: { id: account.userId } }).catch(() => {});
     throw error;
   }
+};
+
+/** The dashboard path each role lands on after authenticating. */
+const ROLE_DASHBOARD_PATH: Record<string, string> = {
+  [ROLES.caregiver]: "/caregiver",
+  [ROLES.senior]: "/senior",
+  [ROLES.partner]: "/partner",
+};
+
+/** Fallback path when the signed-in account has no role profile yet. */
+const NO_ROLE_PATH = "/";
+
+/**
+ * Resolves where the currently signed-in account should land after
+ * authenticating, based on its effective role.
+ *
+ * The three dashboards each gate on role server-side (e.g. the Caregiver
+ * dashboard redirects any non-Caregiver back to `/`), so the sign-in UI can't
+ * send every account to `/caregiver`; a Senior or Partner would just bounce
+ * back to the home page. This action reads the Better Auth session on the
+ * server, resolves the role from the single profile row the account owns, and
+ * returns the matching dashboard path — or `/` when the account has no profile
+ * yet (so there is nothing to bounce into).
+ *
+ * Returns a plain path string so the client can `router.push` to it without
+ * any role logic leaking into the browser.
+ */
+export const resolvePostAuthPath = async (): Promise<string> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return NO_ROLE_PATH;
+
+  const role = await resolveRole(session.user.id);
+  if (!role) return NO_ROLE_PATH;
+
+  return ROLE_DASHBOARD_PATH[role] ?? NO_ROLE_PATH;
 };
